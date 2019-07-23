@@ -8,9 +8,8 @@
 
     <link rel="stylesheet" type="text/css" href="{% static 'draw/vendor/bootstrap/css/bootstrap.min.css' %}">
     <script type="text/javascript" src="{% static 'draw/vendor/jquery/jquery-3.3.1.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'draw/vendor/paper/paper-full.min.js' %}"></script>
-
-    <style type="text/css">
+    <script type="text/javascript" src="{% static 'draw/vendor/paper/paper-full.min.js' %}"></script>    
+  <style type="text/css">
     </style>
 
 </head>
@@ -19,18 +18,84 @@
     <canvas id="myCanvas" width="750px" height="750px"></canvas>
 </body>
 <script>
+  $(document).ready(() => {
 
-    // setting up the canvas and one paper tool
-    var canvas = document.getElementById('myCanvas');
-    paper.setup(canvas);
-    var tool = new paper.Tool();
-
-    // getting the URL (you may want to use for Exercise 3)
-    var url = window.location.href;
-
-    // var socket = new WebSocket(
-    //     'wss://<your url here>/ws/draw');
-
-
+  // setting up the canvas and one paper tool
+  var canvas = document.getElementById('myCanvas');
+  paper.setup(canvas);
+  var tool = new paper.Tool();
+  
+  // random color generator
+  function randomColor() {
+    var letters = '0123456789ABCDEF';
+    var color = '#';
+    for (var i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+  }
+  
+  // create a unique user ID
+  var id = Math.random();
+  var log = {};
+  
+  // sender setup
+  var sender = new paper.Path();
+  var senderColor = randomColor();
+  sender.strokeColor = senderColor;
+  sender.strokeWidth = 5;
+  
+  // create a new websocket variable to connect to the server
+  var socket = new WebSocket(
+    'wss://p3-websockets-tffnybnsws-tboonsawas508393.codeanyapp.com/ws/draw');
+  
+  // use when sending a message to the server  
+  tool.onMouseMove = function(event) {
+    sender.add(event.point);
+    var details = {'senderID':id, 'x':event.point.x, 'y':event.point.y, 'color':senderColor};
+    var message = JSON.stringify(details);
+    socket.send(message);
+  }
+  
+  // returns the href (URL) of the current page (you may want to use for Exercise 3)
+  var url = window.location.href;
+  
+  if (url.indexOf("large") > -1) {
+    socket.onmessage = function(receivedMessage) {
+      return;
+    };
+      
+    socket.onmessage = function(receivedMessage) {
+      var details = JSON.parse(receivedMessage.data);
+      var recID = details.senderID;
+      if (recID in log) {
+        log[recID].add(new paper.Point(details.x, details.y));
+      } else {
+        log[recID] = new paper.Path();
+        log[recID].strokeColor = details.color;
+        log[recID].strokeWidth = 5;
+        log[recID].add(new paper.Point(details.x, details.y));
+      }
+    }
+  };
+        
+  // notify console if socket closes unexpectedly
+  socket.onclose = function(e) {
+    console.error('Chat socket closed unexpectedly');
+  }; 
+  
+    window.addEventListener('devicemotion', (event) => {
+      if ((Math.abs(event.acceleration.x) > 35) && (Math.abs(event.acceleration.y) > 35)) {
+        paper.project.clear();
+      }
+    });
+   
+    window.addEventListener('deviceorientation', (event) => {
+      if (event.gamma > 30) {
+        sender.strokeColor = randomColor();
+      }
+    });
+    
+  });
 </script>
 </html>
