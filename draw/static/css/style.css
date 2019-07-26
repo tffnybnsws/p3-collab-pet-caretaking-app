@@ -47,3 +47,33 @@ body {
   font-size: 20px;
   color: black;
 }
+
+.wrapper {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  overflow: auto;
+}
+
+.navbar {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  overflow: auto;
+}
+
+.navbar a {
+  display: inline-block;
+  text-align: center;
+  width: 15%;
+  color: #555;
+  text-decoration: none;
+}
+
+.navbar a:hover {
+  color: #555;
+}
+
+.material-icons.md-36 { 
+  font-size: 36px; 
+}

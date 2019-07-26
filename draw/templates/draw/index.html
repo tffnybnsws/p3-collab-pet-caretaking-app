@@ -5,7 +5,7 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   	<title>P3 Exquisite Corpse</title>
-  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.9.0/css/all.min.css">
     <script type="text/javascript" src="{% static 'draw/vendor/jquery/jquery-3.3.1.min.js' %}"></script>
@@ -82,7 +82,7 @@
     window.onload = function() { 
       
             openUsersTasks = function(user) {
-        document.getElementById(user).style.width = "45%";
+        document.getElementById(user).style.width = "75%";
       }
       closeUsersTasks = function() {
         document.getElementById("Arthur").style.width = "0%";
@@ -222,7 +222,7 @@ $(document).ready(function(){
 </head> 
   
 <body style="background-color:#E3E7E6;">
-  <div style="width:750px;">
+  <div style="width:800px;">
     <canvas id="myChart" width="400" height="400"></canvas>    
   </div>
   
@@ -232,6 +232,30 @@ $(document).ready(function(){
     <div class="tasks-overlay-content">
       <div id="tasks-load"></div>
     </div>
+  </div>
+  
+  <!-- Bottom navbar -->
+  <div class="wrapper">
+      <div class="navbar">
+  <a class="active" href="#"><i class="material-icons md-36">
+mic
+</i></a> 
+  <a href="#"> <i class="material-icons md-36">
+note_add
+</i></a> 
+  <a href="#"><i class="material-icons md-36">
+chat_bubble
+</i></a> 
+<a href="#"><i class="material-icons md-36">
+assignment_late
+</i></a>
+<a href="#"><i class="material-icons md-36">
+calendar_today
+</i></a> 
+<a href="#"><i class="material-icons md-36">
+settings
+</i></a>
+</div>
   </div>
   </body>
 </html>
