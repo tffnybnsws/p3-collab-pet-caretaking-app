@@ -8,8 +8,5 @@ def index(request):
 def user1(request):
     return render(request, 'draw/user1.html', {})
 
-def user2(request):
-    return render(request, 'draw/user2.html', {})
-
-def user3(request):
-    return render(request, 'draw/user3.html', {})
+def variant(request):
+    return render(request, 'draw/variant.html', {})
