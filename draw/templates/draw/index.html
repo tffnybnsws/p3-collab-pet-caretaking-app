@@ -185,19 +185,26 @@
         openUsersTasks(user);
       }
     };
-        // create a new websocket variable to connect to the server
-  var socket = new WebSocket(
-    'wss://p3-collab-pet-caretaking-app-tboonsawas508393.codeanyapp.com/ws/draw');
       
-    // User message reception -- updates chart data 
-    socket.onmessage = function(receivedMessage) {
-      var details = JSON.parse(receivedMessage.data);
-      var sender = details.sender;
-      var numTasks = details.tasks;
-      console.log(myChart.data.datasets[0].data[sender] + numTasks);
-      myChart.data.datasets[0].data[sender] = myChart.data.datasets[0].data[sender] + numTasks;
-      myChart.update();
-    }
+      // create a new websocket variable to connect to the server
+      var socket = new WebSocket(
+        'wss://p3-collab-pet-caretaking-app-tboonsawas508393.codeanyapp.com/ws/draw');
+      
+      // User message reception -- updates chart data 
+      socket.onmessage = function(receivedMessage) {
+        var details = JSON.parse(receivedMessage.data);
+        var sender = details.sender;
+        var numTasks = details.tasks;
+        var receiver = details.receiver;
+        if (receiver > 2) {
+          console.log(myChart.data.datasets[0].data[sender] + numTasks);
+          myChart.data.datasets[0].data[sender] = myChart.data.datasets[0].data[sender] + numTasks;
+        } else {
+          myChart.data.datasets[0].data[sender] = myChart.data.datasets[0].data[sender] - numTasks;
+          myChart.data.datasets[0].data[receiver] = myChart.data.datasets[0].data[receiver] + numTasks;
+        }
+        myChart.update();
+      }
         
   // Notify console if socket closes unexpectedly
   socket.onclose = function(e) {
@@ -206,31 +213,8 @@
       
     }
 	</script>
+
   <script>
-    
-   /* // WebSocket 
-  $(document).ready(() => {
-  
-  // create a new websocket variable to connect to the server
-  var socket = new WebSocket(
-    'wss://p3-collab-pet-caretaking-app-tboonsawas508393.codeanyapp.com/ws/draw');
-    // User message reception -- updates chart data 
-    socket.onmessage = function(receivedMessage) {
-      var details = JSON.parse(receivedMessage.data);
-      var sender = details.sender;
-      var numTasks = details.tasks;
-      myChart.data.datasets[0].data[sender] = myChart.data.datasets[0].data[sender] + details.numTasks;
-      myChart.update();
-    }
-        
-  // Notify console if socket closes unexpectedly
-  socket.onclose = function(e) {
-    console.error('Chat socket closed unexpectedly');
-  }; 
-    
-  }); */
-</script>
-        <script>
 $(document).ready(function(){
    $('#tasks-load').load("http://p3-collab-pet-caretaking-app-tboonsawas508393.codeanyapp.com/draw/user1/");
 });

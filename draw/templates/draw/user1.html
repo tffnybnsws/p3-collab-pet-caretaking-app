@@ -22,7 +22,7 @@
     // 'Done' button action -- use when sending a message to the server  
     $(document).on('click', '.done', function() {
       $(this).parents('li').remove();
-      var details = {'sender':2, 'tasks':-1};
+      var details = {'sender':2, 'tasks':-1, 'receiver':3};
       var message = JSON.stringify(details);
       socket.send(message);
     });
@@ -40,17 +40,18 @@
       $(this).hide();
     });
     
-          // Delegate to "Odile" -- use when sending a message to the server  
+      // Delegate to "Odile" -- use when sending a message to the server  
       $(document).on('click', '.odile', function() {
         $(this).parents('li').remove();
-        var details = {'sender':0, 'tasks':1};
+        var details = {'sender':2, 'tasks':1, 'receiver':0};
         var message = JSON.stringify(details);
         socket.send(message);
     });
       
-            $(document).on('click', '.franz', function() {
+      // Delegate to "Franz" -- use when sending a message to the server  
+      $(document).on('click', '.franz', function() {
         $(this).parents('li').remove();
-        var details = {'sender':1, 'tasks':1};
+        var details = {'sender':2, 'tasks':1, 'receiver':1};
         var message = JSON.stringify(details);
         socket.send(message);
     });
