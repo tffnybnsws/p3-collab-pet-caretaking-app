@@ -3,99 +3,251 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>P4 Drawing</title>
-
-    <link rel="stylesheet" type="text/css" href="{% static 'draw/vendor/bootstrap/css/bootstrap.min.css' %}">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  	<title>P3 Exquisite Corpse</title>
+  
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.9.0/css/all.min.css">
     <script type="text/javascript" src="{% static 'draw/vendor/jquery/jquery-3.3.1.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'draw/vendor/paper/paper-full.min.js' %}"></script>    
-  <style type="text/css">
-    </style>
-
-</head>
-<body>
-    <!-- You may change the dimensions of this canvas -->
-    <canvas id="myCanvas" width="750px" height="750px"></canvas>
-</body>
-<script>
-  $(document).ready(() => {
-
-  // setting up the canvas and one paper tool
-  var canvas = document.getElementById('myCanvas');
-  paper.setup(canvas);
-  var tool = new paper.Tool();
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.bundle.min.js"></script>
   
-  // random color generator
-  function randomColor() {
-    var letters = '0123456789ABCDEF';
-    var color = '#';
-    for (var i = 0; i < 6; i++) {
-      color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
-  }
-  
-  // create a unique user ID
-  var id = Math.random();
-  var log = {};
-  
-  // sender setup
-  var sender = new paper.Path();
-  var senderColor = randomColor();
-  sender.strokeColor = senderColor;
-  sender.strokeWidth = 5;
-  
-  // create a new websocket variable to connect to the server
-  var socket = new WebSocket(
-    'wss://p3-websockets-tffnybnsws-tboonsawas508393.codeanyapp.com/ws/draw');
-  
-  // use when sending a message to the server  
-  tool.onMouseMove = function(event) {
-    sender.add(event.point);
-    var details = {'senderID':id, 'x':event.point.x, 'y':event.point.y, 'color':senderColor};
-    var message = JSON.stringify(details);
-    socket.send(message);
-  }
-  
-  // returns the href (URL) of the current page (you may want to use for Exercise 3)
-  var url = window.location.href;
-  
-  if (url.indexOf("large") > -1) {
-    socket.onmessage = function(receivedMessage) {
-      return;
+  <script type="text/javascript" canvas="canvas">
+    
+    // Adjust legend margin-bottom; source: https://stackoverflow.com/a/42589310
+    function getBoxWidth(labelOpts, fontSize) {
+      return labelOpts.usePointStyle ?
+        fontSize * Math.SQRT2 :
+      labelOpts.boxWidth;
     };
-      
-    socket.onmessage = function(receivedMessage) {
-      var details = JSON.parse(receivedMessage.data);
-      var recID = details.senderID;
-      if (recID in log) {
-        log[recID].add(new paper.Point(details.x, details.y));
-      } else {
-        log[recID] = new paper.Path();
-        log[recID].strokeColor = details.color;
-        log[recID].strokeWidth = 5;
-        log[recID].add(new paper.Point(details.x, details.y));
-      }
-    }
-  };
-        
-  // notify console if socket closes unexpectedly
-  socket.onclose = function(e) {
-    console.error('Chat socket closed unexpectedly');
-  }; 
-  
-    window.addEventListener('devicemotion', (event) => {
-      if ((Math.abs(event.acceleration.x) > 35) && (Math.abs(event.acceleration.y) > 35)) {
-        paper.project.clear();
-      }
+    
+    Chart.NewLegend = Chart.Legend.extend({
+      afterFit: function() {
+        this.height = this.height + 30;
+      },
     });
-   
-    window.addEventListener('deviceorientation', (event) => {
-      if (event.gamma > 30) {
-        sender.strokeColor = randomColor();
+    
+    function createNewLegendAndAttach(chartInstance, legendOpts) {
+      var legend = new Chart.NewLegend({
+        ctx: chartInstance.chart.ctx,
+        options: legendOpts,
+        chart: chartInstance
+      });
+      
+      if (chartInstance.legend) {
+        Chart.layoutService.removeBox(chartInstance, chartInstance.legend);
+        delete chartInstance.newLegend;
+      }
+      
+      chartInstance.newLegend = legend;
+      Chart.layoutService.addBox(chartInstance, legend);
+    }
+    
+    // register the legend plugin
+    Chart.plugins.register({
+      beforeInit: function(chartInstance) {
+        var legendOpts = chartInstance.options.legend;
+        
+        if (legendOpts) {
+          createNewLegendAndAttach(chartInstance, legendOpts);
+        }
+      },
+      beforeUpdate: function(chartInstance) {
+        var legendOpts = chartInstance.options.legend;
+        
+        if (legendOpts) {
+          legendOpts = Chart.helpers.configMerge(Chart.defaults.global.legend, legendOpts);
+          
+          if (chartInstance.newLegend) {
+            chartInstance.newLegend.options = legendOpts;
+          } else {
+            createNewLegendAndAttach(chartInstance, legendOpts);
+          }
+        } else {
+          Chart.layoutService.removeBox(chartInstance, chartInstance.newLegend);
+          delete chartInstance.newLegend;
+        }
+      },
+      afterEvent: function(chartInstance, e) {
+        var legend = chartInstance.newLegend;
+        if (legend) {
+          legend.handleEvent(e);
+        }
       }
     });
     
-  });
+    var openUsersTasks;
+    var closeUsersTasks;
+    
+    // doughnut chart
+    window.onload = function() { 
+      
+            openUsersTasks = function(user) {
+        document.getElementById(user).style.width = "45%";
+      }
+      closeUsersTasks = function() {
+        document.getElementById("Arthur").style.width = "0%";
+      } 
+      
+      var ctx = document.getElementById("myChart");
+      var myChart = new Chart(ctx, {
+        type: 'doughnut',
+        options: {
+          cutoutPercentage: 70,
+          layout: {
+            padding: 30
+          }
+        },
+        data: {
+          labels: ["Odile", "Franz", "Arthur"],
+          datasets: [{
+            data: [4, 5, 6],
+            backgroundColor: [
+              "#f0ad4e",
+              "#d9534f",
+              "#5bc0de"
+            ],
+            borderWidth: 3
+          }]
+        }
+      });
+      
+      // enlarge chart slice on-click
+      var defaultOuterRadius;
+      var defaultInnerRadius;
+      var addRadiusMargin = 10;
+      var currentSelectedPieceLabel = "";
+      
+      $(document).ready(function() {
+        defaultOuterRadius = myChart.outerRadius;
+        defaultInnerRadius = myChart.innerRadius;
+        explodePieceOnSelect();
+      });
+      
+      function explodePieceOnSelect() {
+        $('#myChart').on('click', function(event) {
+          var activePoints = myChart.getElementsAtEvent(event);
+          if (activePoints.length > 0) {
+            //get the internal index of slice in pie chart
+            var clickedElementindex = activePoints[0]["_index"];
+            
+            //get specific label by index
+            var clickedLabel = myChart.data.labels[clickedElementindex];
+            
+            if (currentSelectedPieceLabel.toUpperCase() == "") {
+              // no piece selected yet, save piece label
+              currentSelectedPieceLabel = clickedLabel.toUpperCase();
+              
+              // clear whole pie
+              myChart.outerRadius = defaultOuterRadius;
+              myChart.update();
+              
+              // update selected pie
+              activePoints[0]["_model"].outerRadius = defaultOuterRadius + addRadiusMargin;
+            } else {
+              if (clickedLabel.toUpperCase() == currentSelectedPieceLabel.toUpperCase()) {
+                // already selected piece clicked, clear the chart
+                currentSelectedPieceLabel = "";
+                
+                // clear whole pie
+                myChart.outerRadius = defaultOuterRadius;
+                myChart.update();
+                
+                // update selected pie
+                activePoints[0]["_model"].outerRadius = defaultOuterRadius;
+                activePoints[0]["_model"].innerRadius = defaultInnerRadius;
+              } else {
+                
+                // other piece clicked
+                currentSelectedPieceLabel = clickedLabel.toUpperCase();
+                // clear whole pie
+                myChart.outerRadius = defaultOuterRadius;
+                myChart.update();
+                
+                // update the newly selected piece
+                activePoints[0]["_model"].innerRadius = defaultInnerRadius + addRadiusMargin;
+                activePoints[0]["_model"].outerRadius = defaultOuterRadius + addRadiusMargin;
+              }
+            }
+            myChart.render(300, false);
+          }
+        });
+      }  
+      
+    // open task menu on slice click
+    ctx.onclick = function(evt) {
+      var activePoints = myChart.getElementsAtEvent(evt);
+      if (activePoints[0]) {
+        var chartData = activePoints[0]['_chart'].config.data;
+        var idx = activePoints[0]['_index'];
+        var label = chartData.labels[idx];
+        var value = chartData.datasets[0].data[idx];
+        var user = label;
+        openUsersTasks(user);
+      }
+    };
+        // create a new websocket variable to connect to the server
+  var socket = new WebSocket(
+    'wss://p3-collab-pet-caretaking-app-tboonsawas508393.codeanyapp.com/ws/draw');
+      
+    // User message reception -- updates chart data 
+    socket.onmessage = function(receivedMessage) {
+      var details = JSON.parse(receivedMessage.data);
+      var sender = details.sender;
+      var numTasks = details.tasks;
+      console.log(myChart.data.datasets[0].data[sender] + numTasks);
+      myChart.data.datasets[0].data[sender] = myChart.data.datasets[0].data[sender] + numTasks;
+      myChart.update();
+    }
+        
+  // Notify console if socket closes unexpectedly
+  socket.onclose = function(e) {
+    console.error('Chat socket closed unexpectedly');
+  }; 
+      
+    }
+	</script>
+  <script>
+    
+   /* // WebSocket 
+  $(document).ready(() => {
+  
+  // create a new websocket variable to connect to the server
+  var socket = new WebSocket(
+    'wss://p3-collab-pet-caretaking-app-tboonsawas508393.codeanyapp.com/ws/draw');
+    // User message reception -- updates chart data 
+    socket.onmessage = function(receivedMessage) {
+      var details = JSON.parse(receivedMessage.data);
+      var sender = details.sender;
+      var numTasks = details.tasks;
+      myChart.data.datasets[0].data[sender] = myChart.data.datasets[0].data[sender] + details.numTasks;
+      myChart.update();
+    }
+        
+  // Notify console if socket closes unexpectedly
+  socket.onclose = function(e) {
+    console.error('Chat socket closed unexpectedly');
+  }; 
+    
+  }); */
 </script>
+        <script>
+$(document).ready(function(){
+   $('#tasks-load').load("http://p3-collab-pet-caretaking-app-tboonsawas508393.codeanyapp.com/draw/user1/");
+});
+</script>
+</head> 
+  
+<body style="background-color:#E3E7E6;">
+  <div style="width:750px;">
+    <canvas id="myChart" width="400" height="400"></canvas>    
+  </div>
+  
+        <!-- User task window -->
+  <div id="Arthur" class="tasks-overlay">
+    <a href="javascript:void(0)" class="closebtn" onclick="closeUsersTasks('Arthur')">&times;</a>
+    <div class="tasks-overlay-content">
+      <div id="tasks-load"></div>
+    </div>
+  </div>
+  </body>
 </html>

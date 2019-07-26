@@ -1,1 +1,200 @@
-akhsduhaskjdhajshda
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  	<title>User 1</title>
+  <link rel="stylesheet" type="text/css" href="{% static 'draw/vendor/bootstrap/css/bootstrap.min.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/user-style.css' %}"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.9.0/css/all.min.css">
+  <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
+  <script type="text/javascript" src="{% static 'draw/vendor/jquery/jquery-3.3.1.min.js' %}"></script>
+  
+  <script>
+    // WebSocket 
+    $(document).ready(() => {
+      
+      // Create a new websocket variable to connect to the server
+      var socket = new WebSocket(
+        'wss://p3-collab-pet-caretaking-app-tboonsawas508393.codeanyapp.com/ws/draw');
+  
+    // 'Done' button action -- use when sending a message to the server  
+    $(document).on('click', '.done', function() {
+      $(this).parents('li').remove();
+      var details = {'sender':2, 'tasks':-1};
+      var message = JSON.stringify(details);
+      socket.send(message);
+    });
+    
+    // 'Delegate' button action -- use when sending a message to the server  
+    $(document).on('click', '.delegate', function() {
+      $(this).parent().siblings('.timeline-body').each(function() {
+        var content = $(this).html();
+        $(this).html('<input value="' + content + '" />');
+      });
+      
+      $(this).siblings('.odile').show();
+      $(this).siblings('.franz').show();
+      $(this).siblings('.done').hide();
+      $(this).hide();
+    });
+    
+          // Delegate to "Odile" -- use when sending a message to the server  
+      $(document).on('click', '.odile', function() {
+        $(this).parents('li').remove();
+        var details = {'sender':0, 'tasks':1};
+        var message = JSON.stringify(details);
+        socket.send(message);
+    });
+      
+            $(document).on('click', '.franz', function() {
+        $(this).parents('li').remove();
+        var details = {'sender':1, 'tasks':1};
+        var message = JSON.stringify(details);
+        socket.send(message);
+    });
+      
+    /* Doesn't work yet
+    $(document).on('click', '.save', function() {
+    $('input').each(function() {
+    var content = $(this).val();
+    $(this).html(content);
+    $(this).contents().unwrap();
+    });
+    $(this).siblings('.more').show();
+    $(this).siblings('.done').show();
+    $(this).hide();
+    }); */
+      
+        // notify console if socket closes unexpectedly
+  socket.onclose = function(e) {
+    console.error('Chat socket closed unexpectedly');
+  }; 
+    });
+  </script>
+  
+  </head>
+  
+  <body>
+    <div class="main-container">
+      <div class="page-header">
+        <h1 id="timeline">Arthur</h1>
+      </div>
+      <ul class="timeline">
+    <li class="timeline-inverted">
+      <div class="timeline-badge"><i class="fas fa-poop"></i></div>
+      <div class="timeline-panel">
+        <div class="timeline-heading">
+          <h4 class="timeline-title">Potty</h4>
+          <p><small class="text-muted"><i class="glyphicon glyphicon-time"></i> 6 AM</small></p>
+        </div>
+        <div class="timeline-body">
+          <p>Waste bag refills located in storage closet on the bottom shelf</p>
+          <hr>
+          <button class="done">Done</button>
+          <button class="odile">Odile</button>
+          <button class="franz">Franz</button>
+          <button class="delegate">Delegate</button>
+        </div>
+      </div>
+    </li>
+    <li class="timeline-inverted">
+      <div class="timeline-badge warning"><i class="fa fa-carrot"></i></div>
+      <div class="timeline-panel">
+        <div class="timeline-heading">
+          <h4 class="timeline-title">Raw Breakfast</h4>
+          <p><small class="text-muted"><i class="glyphicon glyphicon-time"></i> 6:30 AM</small></p>
+        </div>
+        <div class="timeline-body">
+          <p>50% chicken thighs or breasts<br>
+15% chicken hearts and liver<br>
+20% ground chicken bone<br>
+5% organic broccoli<br>
+5% organic spinach<br>
+5% organic carrots</p>
+          <p>Mix well and serve fresh (or freeze for later). Puree the veggies for better digestibility.</p>
+          <hr>
+          <button class="done">Done</button>
+          <button class="odile">Odile</button>
+          <button class="franz">Franz</button>
+          <button class="delegate">Delegate</button>
+        </div>
+      </div>
+    </li>
+    <li class="timeline-inverted">
+      <div class="timeline-badge danger"><i class="fa fa-cannabis"></i></div>
+      <div class="timeline-panel">
+        <div class="timeline-heading">
+          <h4 class="timeline-title">CBD Oil</h4>
+          <p><small class="text-muted"><i class="glyphicon glyphicon-time"></i> 6:30 AM</small></p>
+        </div>
+        <div class="timeline-body">
+          <p>Give (1) dropperful</p>
+          <hr>
+          <button class="done">Done</button>
+          <button class="odile">Odile</button>
+          <button class="franz">Franz</button>
+          <button class="delegate">Delegate</button>
+        </div>
+      </div>
+    </li>
+    <li class="timeline-inverted">
+      <div class="timeline-badge info"><i class="fa fa-bath"></i></div>
+      <div class="timeline-panel">
+        <div class="timeline-heading">
+          <h4 class="timeline-title">Bath</h4>
+          <p><small class="text-muted"><i class="glyphicon glyphicon-time"></i> 9 AM</small></p>
+        </div>
+        <div class="timeline-body">
+          <p>Dog shampoo, conditioner, and towel located under bathroom sink</p>
+          <hr>
+          <button class="done">Done</button>
+          <button class="odile">Odile</button>
+          <button class="franz">Franz</button>
+          <button class="delegate">Delegate</button>
+        </div>
+      </div>
+    </li>
+    <li class="timeline-inverted">
+      <div class="timeline-badge info"><i class="fa fa-bug"></i></div>
+      <div class="timeline-panel">
+        <div class="timeline-heading">
+          <h4 class="timeline-title">Apply flea drops</h4>
+          <p><small class="text-muted"><i class="glyphicon glyphicon-time"></i> 10 AM</small></p>
+        </div>
+        <div class="timeline-body">
+          <p>Instructions:<br>
+            Snap open the tip of the Frontline applicator away from your body and face.
+Part your pet's hair between the shoulder blades until you can see the skin, and place the tip of the applicator on the skin.
+Squeeze applicator to apply entire contents in a single spot on the skin monthly.
+Allow 24 hours before bathing or swimming.</p>
+          <hr>
+          <button class="done">Done</button>
+          <button class="odile">Odile</button>
+          <button class="franz">Franz</button>
+          <button class="delegate">Delegate</button>
+        </div>
+      </div>
+    </li>
+    <li class="timeline-inverted">
+      <div class="timeline-badge success"><i class="fa fa-baseball-ball"></i></div>
+      <div class="timeline-panel">
+        <div class="timeline-heading">
+          <h4 class="timeline-title">Play</h4>
+          <p><small class="text-muted"><i class="glyphicon glyphicon-time"></i> 12 PM</small></p>
+        </div>
+        <div class="timeline-body">
+          <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d12597.77371558984!2d-122.2750034!3d37.8733114!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0xc55f1a538e6cb706!2sOhlone+Doggy+Park!5e0!3m2!1sen!2sus!4v1564015675390!5m2!1sen!2sus" width="400" height="300" frameborder="0" style="border:0" allowfullscreen></iframe>
+          <hr>
+          <button class="done">Done</button>
+          <button class="odile">Odile</button>
+          <button class="franz">Franz</button>
+          <button class="delegate">Delegate</button>
+        </div>
+      </div>
+    </li>
+  </ul>
+</div>
+  </body>
+</html>
